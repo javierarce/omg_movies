@@ -2,8 +2,6 @@
 
 var Config = require('./lib/config')();
 var Bot = require('./lib/bot')(Config);
-var _ = require('underscore');
-var rand = require('unique-random');
 
 var the_movie = '';
 var titleRhyme = '';
@@ -45,6 +43,3 @@ Bot.getRandomMovie().then(function(movie) {
   console.log(e);
 })
 .done();
-
-
-
