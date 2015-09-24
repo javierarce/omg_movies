@@ -1,0 +1,14 @@
+[
+  "I think <%= actor %> should make more movies",
+  "yo <%= actor %> is the best",
+  "Watching <%= title %> might not be the best movie, but I love <%= actor %>!",
+  "looking forward to <%= actor %>'s next movie!",
+  "Wow! <%= actor %> was great in <%= title %>!!!",
+  "Wasn't <%= actor %> just the best in <%= title %>?",
+  "<%= title %> is the best movie ever, <%= actor %> is so cute",
+  "<%= actor %> totally deserved the Oscar for <%= title %>",
+  "<%= title %>! I loved it! If you're a fan of <%= actor %>, see it!",
+  "Wasn't <%= actor %> the best in <%= title %>? I mean… right?",
+  "whaaat! did <%= actor %> just die in <%= title %>!?",
+  "<%= title %> with <%= actor %> is soooooo goood guys!"
+]
