@@ -28,14 +28,14 @@ Bot.getRandomMovie().then(function(movie) {
     newTitle   = Bot.getNewTitle(title, word, titleRhyme);
 
     return Bot.getNewActorName(actor).then(function(rhymes) {
-      var names = actor.trim().split(' ');
-      var name = names[1];
+      var lastName = Bot.getActorLastName(actor);
       var rhyme = Bot.getRandomRhyme(rhymes);
       if (rhyme) {
-        return Bot.getNewActor(actor, name, rhyme);
+        return Bot.getNewActor(actor, lastName, rhyme);
       }
     });
   }
+
 }).then(function(newActor) {
   Bot.tweet(newTitle, newActor, the_movie);
 })
