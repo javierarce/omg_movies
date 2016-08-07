@@ -31,7 +31,7 @@ Bot.getRandomMovie().then(function(movie) {
       var lastName = Bot.getActorLastName(actor);
       var rhyme = Bot.getRandomRhyme(rhymes);
       if (rhyme) {
-        return Bot.getNewActor(actor, lastName, rhyme);
+        return Bot.buildNewActorName(actor, lastName, rhyme);
       }
     });
   }
