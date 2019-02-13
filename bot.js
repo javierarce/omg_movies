@@ -16,14 +16,22 @@ let config = {
   timeout_ms: 60*1000
 }
 
-const T = new Twit(config)
-
-const capitalize = (string) => {
-  if (!string) return string
-  return string.charAt(0).toUpperCase() + string.substring(1).toLowerCase()
-}
-
 module.exports = class Bot {
+  constructor () {
+    this.Tweet = new Twit(config)
+    this.movie = {}  
+  }
+  
+  onError (error) {
+    console.log(this.movie)
+    console.error(error)
+  }
+
+  capitalize (string) {
+    if (!string) return string
+    return string.charAt(0).toUpperCase() + string.substring(1).toLowerCase()
+  }
+
   getRandomActor (movie) {
     let actors = movie.Actors.split(',')
     return actors[rand(0, actors.length - 1)()].trim()
@@ -31,7 +39,7 @@ module.exports = class Bot {
 
   buildNewActorName (actor, word, rhyme) {
     let regexp = new RegExp(word, 'g')
-    return actor.replace(regexp, capitalize(rhyme))
+    return actor.replace(regexp, this.capitalize(rhyme))
   }
 
   getActorLastName (name) {
@@ -41,21 +49,21 @@ module.exports = class Bot {
 
   getNewTitle (title, word, rhyme) {
     let regexp = new RegExp(word, 'g')
-    return title.replace(regexp, capitalize(rhyme))
+    return title.replace(regexp, this.capitalize(rhyme))
   }
 
-  _getRandomGenre (movie) {
+  getRandomGenre (movie) {
     let genres = movie.Genre.split(',')
     return genres[0].trim().toLowerCase()
   }
 
-  _getRandomExclamation () {
+  getRandomExclamation () {
     let exclamations = ['OMG', 'hahaha', 'wow', 'guys', 'yay']
     let r = rand(0, exclamations.length - 1)()
     return exclamations[r]
   }
 
-  _getRandomTemplate (templates) {
+  getRandomTemplate (templates) {
     let r = rand(0, templates.length - 1)()
     return _.template(templates[r])
   }
@@ -111,7 +119,7 @@ module.exports = class Bot {
         sameContext = relationship.words
       }
     })
-    
+
     if (!rhymes.length) {
       rhymes = sameContext
     }
@@ -119,37 +127,102 @@ module.exports = class Bot {
     if (rhymes && rhymes.length) {
       return this.getRandomRhyme(rhymes)
     } 
-    
+
     return undefined
-}
-  
+  }
+
   getRandomRhyme (rhymes) {
     if (rhymes) {
       return rhymes[rand(0, rhymes.length - 1)()]
     }
     return null
   }
-  
+
   generateStatusForActorAndMovie (title, actor, movie) {
     let status = null
     let templates = movieTemplates
-    let tpl = this._getRandomTemplate(templates)
+    let tpl = this.getRandomTemplate(templates)
 
     let director = movie.Director
-    let genre = this._getRandomGenre(movie)
-    let exclamation = this._getRandomExclamation()
-    
+    let genre = this.getRandomGenre(movie)
+    let exclamation = this.getRandomExclamation()
+
     return tpl({ title, actor, director, genre, exclamation })
   }
-  
+
+  onGetRhymesForActor (response) {
+    let actor = this.movie.actor
+
+    if (response.data && response.data.length) {
+      let lastNameRhyme = this.getRhymeOrContextFromData(response.data)
+
+      if (lastNameRhyme) {
+        this.movie.newActorName = this.buildNewActorName(this.movie.actor, this.movie.actorLastName, lastNameRhyme)
+        actor = this.movie.newActorName
+      } 
+    }
+
+    let status = this.generateStatusForActorAndMovie(this.movie.newTitle, actor, this.movie.data)
+    this.publishTweet(status)   
+  }
+
+  onGetRhymesForMovie (response) {
+
+    if (!response.data || !response.data.length) {
+      throw(`couldnt find rhymes for ${this.movie.word}`)
+    }
+
+    let titleRhyme = this.getRhymeOrContextFromData(response.data)
+
+    if (!titleRhyme) {
+      throw(`couldnt find rhymes`)
+    }
+
+    this.movie.newTitle = this.getNewTitle(this.movie.title, this.movie.word, titleRhyme)
+    this.movie.actor = this.getRandomActor(this.movie.data)
+    this.movie.actorLastName = this.getActorLastName(this.movie.actor)
+
+    this.getRhymesFor(this.movie.actorLastName.toLowerCase()).then(this.onGetRhymesForActor.bind(this)).catch(this.onError.bind(this))  
+  }
+
+  onGetRandomMovie (response) {
+
+    if (!response.data) {
+      throw('Couldn\'t find a movie, sorry')    
+    }
+
+    this.movie.data = response.data
+    this.movie.title = this.movie.data.Title
+
+    if (!this.movie.title || this.movie.title.split(' ').length < 2) {
+      throw('Couldn\'t find a title, sorry')
+    }
+
+    this.movie.word = this.getRandomWord(this.movie.title)
+
+    if (!this.movie.word) {
+      throw('Couldn\'t find a word in the title, sorry')
+    }
+
+    this.getRhymesFor(this.movie.word.toLowerCase()).then(this.onGetRhymesForMovie.bind(this)).catch(this.onError.bind(this))
+  }
+
+  start () {
+    try {
+      this.getRandomMovie().then(this.onGetRandomMovie.bind(this)).catch(this.onError.bind(this))
+    } catch (e) {
+      this.onError(e)
+    }
+  }
+
   publishTweet (status) {
     if (process.env.ENABLED === 'false') {
       console.log('Tweeting is disabled')
       console.log(status)
       return
     } 
-    
-    T.post('statuses/update', { status }, (err, data, response) => {
+
+    this.Tweet.post('statuses/update', { status }, (err, data, response) => {
       if (err) {
         console.log('Error: ', err)
       } else {
