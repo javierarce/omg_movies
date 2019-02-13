@@ -143,9 +143,9 @@ module.exports = class Bot {
   }
   
   publishTweet (status) {
-    
     if (process.env.ENABLED === 'false') {
       console.log('Tweeting is disabled')
+      console.log(status)
       return
     } 
     /*
