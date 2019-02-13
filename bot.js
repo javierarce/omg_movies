@@ -148,7 +148,7 @@ module.exports = class Bot {
       console.log(status)
       return
     } 
-    /*
+    
     T.post('statuses/update', { status }, (err, data, response) => {
       if (err) {
         console.log('Error: ', err)
@@ -156,6 +156,5 @@ module.exports = class Bot {
         console.log('Published: ', status)
       }
     })
-    */
   }
 }

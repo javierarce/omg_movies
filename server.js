@@ -21,33 +21,25 @@ app.get('/', (request, response) => {
 })
 
 const onError = (error) => {
-  console.log(error)
+  console.error(error)
+  console.log(Movie)
 }
 
 const onGetRhymesForActor = (response) => {
-  if (!response.data || !response.data.length) {
-    console.log(`couldnt find rhymes for ${Movie.actorLastName}`)
-
-    console.log(Movie)
-    let status = bot.generateStatusForActorAndMovie(Movie.newTitle, Movie.actor, Movie.data)
-    bot.publishTweet(status)
-
-    return
+  let actor = Movie.actor
+  
+  if (response.data && response.data.length) {
+    let lastNameRhyme = bot.getRhymeOrContextFromData(response.data)
+  
+    if (lastNameRhyme) {
+      Movie.newActorName = bot.buildNewActorName(Movie.actor, Movie.actorLastName, lastNameRhyme)
+      actor = Movie.newActorName
+    } 
   }
-
-  let lastNameRhyme = bot.getRhymeOrContextFromData(response.data)
-
-  if (lastNameRhyme) {
-    Movie.newActorName = bot.buildNewActorName(Movie.actor, Movie.actorLastName, lastNameRhyme)
-    console.log(Movie)
-    
-    let status = bot.generateStatusForActorAndMovie(Movie.newTitle, Movie.newActorName, Movie.data)
-    bot.publishTweet(status)
-  } else {
-    console.log(Movie)
-    let status = bot.generateStatusForActorAndMovie(Movie.newTitle, Movie.actor, Movie.data)
-    bot.publishTweet(status)   
-  }
+  
+  console.log(Movie)
+  let status = bot.generateStatusForActorAndMovie(Movie.newTitle, actor, Movie.data)
+  bot.publishTweet(status)   
 }
 
 const onGetRhymesForMovie = (response) => {
@@ -74,8 +66,8 @@ const onGetRandomMovie = (response) => {
   }
 
   Movie.data = response.data
-  Movie.title = response.data.Title
-
+  Movie.title = Movie.data.Title
+  
   if (!Movie.title) {
     throw('Couldn\'t find a title, sorry')
   }
@@ -89,9 +81,15 @@ const onGetRandomMovie = (response) => {
   bot.getRhymesFor(Movie.word.toLowerCase()).then(onGetRhymesForMovie).catch(onError)
 }
 
-app.get('/movie', (request, response) => {
+app.get(`/${process.env.SECRET}`, (request, response) => {
   Movie = {}
-  bot.getRandomMovie().then(onGetRandomMovie).catch(onError)
+  
+  try {
+    bot.getRandomMovie().then(onGetRandomMovie).catch(onError)
+  } catch (e) {
+    onError(e)
+  }
+  
   response.end('ok')
 })
 
