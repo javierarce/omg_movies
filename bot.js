@@ -1,14 +1,21 @@
 'use strict'
 
-const _ = require('underscore')
 const axios = require('axios')
 const rand = require('unique-random')
 const Twit = require('twit')
 
-const movies = require('./movies.json')
-const movieTemplates = require('./movie_templates.json')
+const movies = require('./data/movies.json')
+const movieTemplates = require('./data/movie_templates.json')
+const RHYME = 'rhyme'
 
-let config = {
+const FORBIDDEN_WORDS = [
+  'the', 'of', 'for', 'but', 'and', 'with', 'from', 'any',
+  'some', 'an', 'a', 'without', 'by', 'de', 'days', 'c', 'b', 'l'
+]
+
+const EXCLAMATIONS = ['OMG', 'hahaha', 'wow', 'guys', 'yay']
+
+const TWITTER_CONFIG = {
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
   access_token: process.env.TWITTER_CONSUMER_ACCESS_TOKEN,
@@ -18,7 +25,7 @@ let config = {
 
 module.exports = class Bot {
   constructor () {
-    this.Tweet = new Twit(config)
+    this.Tweet = new Twit(TWITTER_CONFIG)
     this.movie = {}  
   }
   
@@ -58,14 +65,13 @@ module.exports = class Bot {
   }
 
   getRandomExclamation () {
-    let exclamations = ['OMG', 'hahaha', 'wow', 'guys', 'yay']
-    let r = rand(0, exclamations.length - 1)()
-    return exclamations[r]
+    let r = rand(0, EXCLAMATIONS.length - 1)()
+    return EXCLAMATIONS[r]
   }
 
   getRandomTemplate (templates) {
     let r = rand(0, templates.length - 1)()
-    return _.template(templates[r])
+    return templates[r]
   }
 
   getRandomMovie () {
@@ -76,7 +82,7 @@ module.exports = class Bot {
 
   getRhymesFor (word) {
     let useCanonical = false
-    let relationshipTypes = 'rhyme'
+    let relationshipTypes = RHYME
     let limitPerRelationshipType = 10
     let host = process.env.WORDNICK_HOST
     let api_key = process.env.WORDNICK_API
@@ -90,19 +96,14 @@ module.exports = class Bot {
   getRandomWord (sentence) {
     sentence = sentence.replace(/\W+/g, ' ')
     let words = sentence.trim().split(' ')
-
-    words = _.reject(words, (word) => {
-      return word.length < 3
+    
+    words = words.filter((word) => {
+      return word.length > 3
     })
 
     let word = words[rand(0, words.length - 1)()]
 
-    let forbiddenWords = [
-      'the', 'of', 'for', 'but', 'and', 'with', 'from', 'any',
-      'some', 'an', 'a', 'without', 'by', 'de', 'days', 'c', 'b', 'l'
-    ]
-
-    while (_.contains(forbiddenWords, word.toLowerCase())) {
+    while (FORBIDDEN_WORDS.includes(word.toLowerCase())) {
       word = words[rand(0, words.length - 1)()]
     }
     return word
@@ -113,7 +114,7 @@ module.exports = class Bot {
     let sameContext = []
 
     data.forEach((relationship) => {
-      if (relationship.relationshipType === 'rhyme') {
+      if (relationship.relationshipType === RHYME) {
         rhymes = relationship.words
       } else if (relationship.relationshipType === 'same-context') {
         sameContext = relationship.words
@@ -147,7 +148,13 @@ module.exports = class Bot {
     let genre = this.getRandomGenre(movie)
     let exclamation = this.getRandomExclamation()
 
-    return tpl({ title, actor, director, genre, exclamation })
+    tpl = tpl.replace(new RegExp('DIRECTOR', 'g'), director)
+    tpl = tpl.replace(new RegExp('GENRE', 'g'), genre)
+    tpl = tpl.replace(new RegExp('ACTOR', 'g'), actor)
+    tpl = tpl.replace(new RegExp('TITLE', 'g'), title)
+    tpl = tpl.replace(new RegExp('EXCLAMATION', 'g'), exclamation)
+    
+    return tpl
   }
 
   onGetRhymesForActor (response) {
