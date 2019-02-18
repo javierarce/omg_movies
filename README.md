@@ -5,7 +5,7 @@ A Twitter bot that loves films big time but doesn't have a very good memory :(
 
 Watch it in action here: https://twitter.com/omg_movies
 
-### How does it works
+### How does it work
 
 The data folder of the bot contains a list of Internet Movie Database movie ids. When a new tweet is requested, a random id is picked and used to obtain a hash with all the movie metadata using [OMDB](http://omdbapi.com).
 
@@ -13,7 +13,7 @@ The bot then picks a word from the movie title and tries to find a word that rhy
 
 Finally, the bot picks a random template from `movie_templates`, replaces the special tokens (TITLE, ACTOR, GENRE, DIRECTOR), and publishes the tweet.
 
-### How to install
+### How to install it
 
 1. [Remix the project on Glitch](https://glitch.com/edit/#!/omg-movies)
 2. Edit the `key.env` file with:
