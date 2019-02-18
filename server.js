@@ -3,6 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 
 const Bot = require('./bot.js')
+
 let bot = new Bot()
 
 app.use(express.static('public'))

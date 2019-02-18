@@ -1,27 +1,25 @@
-Welcome to Glitch
+OMG Movies!
 =================
 
-Click `Show` in the header to see your app live. Updates to your code will instantly deploy and update live.
+A Twitter bot that loves films big time but doesn't have a very good memory :( 
 
-**Glitch** is the friendly community where you'll build the app of your dreams. Glitch lets you instantly create, remix, edit, and host an app, bot or site, and you can invite collaborators or helpers to simultaneously edit code with you.
+### How does it works
 
-Find out more [about Glitch](https://glitch.com/about).
+The data folder of the bot contains a list of Internet Movie Database move ids. Whenever a new tweet is generated, a random id is picked and used to obtain a hash with all the movie metadata.
 
+The bot then picks a word from the title and tries to find a word that rhymes or belongs to the same semantic context using the Wordnick API. If a rhyme is found, the word is replaced in the title. The bot applies the same substitution with the name of the actor. 
 
-Your Project
-------------
+Finally, the bot picks a random template from `movie_templates`, replaces the special tokens (TITLE, ACTOR, GENRE, DIRECTOR), and publishes the tweet.
 
-On the front-end,
-- edit `public/client.js`, `public/style.css` and `views/index.html`
-- drag in `assets`, like images or music, to add them to your project
+### How to install
 
-On the back-end,
-- your app starts at `server.js`
-- add frameworks and packages in `package.json`
-- safely store app secrets in `.env` (nobody can see this but you and people you invite)
+1. [Remix the project on Glitch](https://glitch.com/edit/#!/omg-movies)
+2. Edit the `key.env` file with:
+ - A random `SECRET` string to update the bot and publish a new tweet.
+ - A [wordnick](https://developer.wordnik.com/) API key.
+ - An [OMDB](http://omdbapi.com) API key.
+ - Your [Twitter app](https://developer.twitter.com/en/apps) credentials.
+ 
+Once everything is in place visit `YOUR_GLITCH_URL.com/SECRET` to generate and publish a new Tweet.
 
-
-Made by [Glitch](https://glitch.com/)
--------------------
-
-\ ゜o゜)ノ
+Bonus points: use [cron-job.org](https://cron-job.org) to ping the secret URL every X minutes.
