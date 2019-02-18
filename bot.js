@@ -8,6 +8,8 @@ const movies = require('./data/movies.json')
 const movieTemplates = require('./data/movie_templates.json')
 const RHYME = 'rhyme'
 
+const WORDNICK_HOST='https://api.wordnik.com'
+
 const FORBIDDEN_WORDS = [
   'the', 'of', 'for', 'but', 'and', 'with', 'from', 'any',
   'some', 'an', 'a', 'without', 'by', 'de', 'days', 'c', 'b', 'l'
