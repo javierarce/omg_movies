@@ -1,5 +1,7 @@
 'use strict'
 
+const ENABLED = false // If this is set to true, the bot will publish a Tweet.
+
 const axios = require('axios')
 const rand = require('unique-random')
 const Twit = require('twit')
@@ -8,7 +10,7 @@ const movies = require('./data/movies.json')
 const movieTemplates = require('./data/movie_templates.json')
 const RHYME = 'rhyme'
 
-const WORDNICK_HOST='https://api.wordnik.com'
+const WORDNICK_HOST = 'https://api.wordnik.com'
 
 const FORBIDDEN_WORDS = [
   'the', 'of', 'for', 'but', 'and', 'with', 'from', 'any',
@@ -86,7 +88,7 @@ module.exports = class Bot {
     let useCanonical = false
     let relationshipTypes = RHYME
     let limitPerRelationshipType = 10
-    let host = process.env.WORDNICK_HOST
+    let host = WORDNICK_HOST
     let api_key = process.env.WORDNICK_API
     let endpoint = 'relatedWords'
 
@@ -225,7 +227,7 @@ module.exports = class Bot {
   }
 
   publishTweet (status) {
-    if (process.env.ENABLED === 'false') {
+    if (!ENABLED) {
       console.log('Tweeting is disabled')
       console.log(status)
       return
