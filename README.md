@@ -3,11 +3,13 @@ OMG Movies!
 
 A Twitter bot that loves films big time but doesn't have a very good memory :( 
 
+Watch it in action here: https://twitter.com/omg_movies
+
 ### How does it works
 
-The data folder of the bot contains a list of Internet Movie Database move ids. Whenever a new tweet is generated, a random id is picked and used to obtain a hash with all the movie metadata.
+The data folder of the bot contains a list of Internet Movie Database movie ids. When a new tweet is requested, a random id is picked and used to obtain a hash with all the movie metadata using [OMDB](http://omdbapi.com).
 
-The bot then picks a word from the title and tries to find a word that rhymes or belongs to the same semantic context using the Wordnick API. If a rhyme is found, the word is replaced in the title. The bot applies the same substitution with the name of the actor. 
+The bot then picks a word from the movie title and tries to find a word that rhymes or belongs to the same semantic context using the [Wordnick API](https://developer.wordnik.com). If a rhyme is found, it's then used to replaced the original word in the title. The bot applies the same kind of substitution with the last name of the main actor/actress. 
 
 Finally, the bot picks a random template from `movie_templates`, replaces the special tokens (TITLE, ACTOR, GENRE, DIRECTOR), and publishes the tweet.
 
@@ -20,6 +22,6 @@ Finally, the bot picks a random template from `movie_templates`, replaces the sp
  - An [OMDB](http://omdbapi.com) API key.
  - Your [Twitter app](https://developer.twitter.com/en/apps) credentials.
  
-Once everything is in place visit `YOUR_GLITCH_URL.com/SECRET` to generate and publish a new Tweet.
+Once that is ready visit `YOUR_GLITCH_URL.com/SECRET` to generate and publish a new Tweet.
 
-Bonus points: use [cron-job.org](https://cron-job.org) to ping the secret URL every X minutes.
+**Bonus points**: use [cron-job.org](https://cron-job.org) to ping the secret URL every X minutes.
